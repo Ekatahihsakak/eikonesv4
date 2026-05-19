@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ματίς — Ο Χορός | Άσκηση Κενών</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#f5f0e8;font-family:Georgia,serif;padding:1.5rem 1rem 3rem;color:#2c1f0e}
+.header{text-align:center;margin-bottom:1.75rem}
+.header .sub{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:#8b7355;margin-bottom:.4rem}
+.header h1{font-size:1.2rem;font-weight:normal;line-height:1.5}
+.header .line{width:50px;height:2px;background:#8b7355;margin:.9rem auto 0}
+.bank-box{background:#ede6d6;border:1px solid #c9b89a;border-radius:10px;padding:.9rem 1rem;margin-bottom:1.5rem}
+.bank-label{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:#8b7355;margin-bottom:.6rem}
+.bank-words{display:flex;flex-wrap:wrap;gap:.45rem}
+.word-chip{padding:.35rem .8rem;border-radius:20px;background:#fff;border:1.5px solid #8b7355;font-size:.9rem;cursor:pointer;user-select:none;transition:.15s;-webkit-tap-highlight-color:transparent}
+.word-chip.used{background:#d5cfc4;border-color:#c5bfb4;color:#aaa;pointer-events:none}
+.word-chip.selected{background:#2c1f0e;color:#f5f0e8;border-color:#2c1f0e}
+.text-box{background:#fff;border:1px solid #d6cabb;border-radius:12px;padding:1.4rem 1.2rem;font-size:1rem;line-height:2.2;margin-bottom:1.2rem;box-shadow:0 2px 12px rgba(44,31,14,.06)}
+.blank{display:inline-block;min-width:110px;padding:0 .4rem;border-bottom:2px solid #8b7355;border-radius:3px 3px 0 0;text-align:center;font-size:.92rem;cursor:pointer;transition:.15s;vertical-align:bottom;-webkit-tap-highlight-color:transparent}
+.blank.long{min-width:150px}
+.blank.empty{color:#bbb;font-style:italic}
+.blank.filled{background:#faf6f0;color:#2c1f0e}
+.blank.correct{background:#eaf4ea;border-color:#5a8a5a;color:#3a6b3a}
+.blank.wrong{background:#fdf0ef;border-color:#c0392b;color:#c0392b}
+.blank.active-target{border-color:#2c1f0e;background:#f0ebe0}
+.buttons{display:flex;gap:.6rem;justify-content:center;margin-bottom:1rem}
+.btn-check{padding:.65rem 1.6rem;background:#2c1f0e;color:#f5f0e8;border:none;border-radius:6px;font-size:.9rem;font-family:Georgia,serif;cursor:pointer;letter-spacing:.05em}
+.btn-check:disabled{background:#c5bfb4;color:#aaa;cursor:default}
+.btn-reset{padding:.65rem 1.4rem;background:transparent;color:#8b7355;border:1.5px solid #8b7355;border-radius:6px;font-size:.9rem;font-family:Georgia,serif;cursor:pointer;letter-spacing:.05em}
+.score{text-align:center;padding:.7rem 1rem;border-radius:8px;font-size:.95rem;margin-bottom:1rem;display:none}
+.score.show{display:block}
+.score.perfect{background:#eaf4ea;border:1.5px solid #5a8a5a;color:#3a6b3a}
+.score.partial{background:#fdf6ee;border:1.5px solid #c9a96e;color:#7a5c2e}
+.hint{text-align:center;font-size:.72rem;color:#b0a48a;letter-spacing:.04em;margin-top:.5rem}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="sub">Άσκηση Κατανόησης</div>
+  <h1>Α. Ματίς<br>«Ο Χορός»</h1>
+  <div class="line"></div>
+</div>
+
+<div class="bank-box">
+  <div class="bank-label">Λέξεις</div>
+  <div class="bank-words" id="bank"></div>
+</div>
+
+<div class="text-box" id="textbox"></div>
+<div class="score" id="score"></div>
+
+<div class="buttons">
+  <button class="btn-check" id="btnCheck" disabled onclick="checkAnswers()">Έλεγχος</button>
+  <button class="btn-reset" onclick="reset()">Επαναφορά</button>
+</div>
+
+<div class="hint">Οι λέξεις είναι ανακατεμένες. Πάτα μια λέξη, μετά πάτα το κενό • Πάτα συμπληρωμένο κενό για αφαίρεση</div>
+
+<script>
+// Οι λέξεις εδώ είναι ΕΠΙΤΗΔΕΣ ανακατεμένες και όχι στη σειρά των κενών.
+const WORDS=[
+  "αναζήτησης",
+  "φόντο",
+  "τακτοποιείς",
+  "Χορός",
+  "αισθήματά",
+  "Γκωγκέν",
+  "μορφές",
+  "διακοσμητικό",
+  "κύκλου",
+  "ενθουσιώδης",
+  "στοιχεία",
+  "χρωματισμένο",
+  "σπουδής",
+  "διάθεση",
+  "επιφανειακός",
+  "ταϊτινούς",
+  "απλοποιημένο",
+  "αυθορμητισμός",
+  "σύνθεση"
+];
+
+const SEGMENTS=[
+{type:"text",content:"Εικ. 2. Α. Ματίς (H. Matisse, 1869-1954), «Ο "},
+{type:"blank",id:0,answer:"Χορός"},
+{type:"text",content:"» (1910-1911), λάδι σε μουσαμά, 2,60 x 3,19 μ., Αγ. Πετρούπολη, Ερμιτάζ. Το έργο δείχνει "},
+{type:"blank",id:1,answer:"μορφές"},
+{type:"text",content:" που χορεύουν σε σχήμα "},
+{type:"blank",id:2,answer:"κύκλου"},
+{type:"text",content:". Το "},
+{type:"blank",id:3,answer:"φόντο"},
+{type:"text",content:", έντονα "},
+{type:"blank",id:4,answer:"χρωματισμένο",long:true},
+{type:"text",content:" και "},
+{type:"blank",id:5,answer:"απλοποιημένο",long:true},
+{type:"text",content:", αναδεικνύει τις μορφές, που παραπέμπουν ως προς τη "},
+{type:"blank",id:6,answer:"διάθεση"},
+{type:"text",content:" στους "},
+{type:"blank",id:7,answer:"ταϊτινούς"},
+{type:"text",content:" πίνακες του "},
+{type:"blank",id:8,answer:"Γκωγκέν"},
+{type:"text",content:". «Η "},
+{type:"blank",id:9,answer:"σύνθεση"},
+{type:"text",content:" είναι η τέχνη του να "},
+{type:"blank",id:10,answer:"τακτοποιείς",long:true},
+{type:"text",content:" με "},
+{type:"blank",id:11,answer:"διακοσμητικό",long:true},
+{type:"text",content:" τρόπο τα διάφορα "},
+{type:"blank",id:12,answer:"στοιχεία"},
+{type:"text",content:" που έχει στη διάθεσή του ένας ζωγράφος, για να εκφράσει τα "},
+{type:"blank",id:13,answer:"αισθήματά",long:true},
+{type:"text",content:" του», έλεγε ο Ματίς. Ο "},
+{type:"blank",id:14,answer:"ενθουσιώδης",long:true},
+{type:"text",content:" "},
+{type:"blank",id:15,answer:"αυθορμητισμός",long:true},
+{type:"text",content:" στο έργο του Ματίς είναι φαινομενικά "},
+{type:"blank",id:16,answer:"επιφανειακός",long:true},
+{type:"text",content:". Στην πραγματικότητα το έργο του είναι προϊόν μακράς "},
+{type:"blank",id:17,answer:"σπουδής"},
+{type:"text",content:", "},
+{type:"blank",id:18,answer:"αναζήτησης",long:true},
+{type:"text",content:" και επεξεργασίας."}
+];
+
+let filled={},selectedWord=null,checked=false;
+
+function render(){
+ const bank=document.getElementById("bank");
+ const used=Object.values(filled);
+ bank.innerHTML="";
+ WORDS.forEach(w=>{
+  const chip=document.createElement("span");
+  chip.className="word-chip"+(used.includes(w)?" used":"")+(selectedWord===w?" selected":"");
+  chip.textContent=w;
+  chip.onclick=()=>selectWord(w);
+  bank.appendChild(chip);
+ });
+
+ const tb=document.getElementById("textbox");
+ tb.innerHTML="";
+ SEGMENTS.forEach(seg=>{
+  if(seg.type==="text"){tb.appendChild(document.createTextNode(seg.content));}
+  else{
+   const val=filled[seg.id];
+   const span=document.createElement("span");
+   let cls="blank"+(seg.long?" long":"");
+   if(checked&&val){cls+=val===seg.answer?" correct":" wrong";}
+   else if(val){cls+=" filled";}
+   else{cls+=" empty"; if(selectedWord)cls+=" active-target";}
+   span.className=cls;
+   span.textContent=val?val+(checked?(val===seg.answer?" ✓":" ✗"):""):"_ _ _ _ _";
+   span.onclick=()=>val?removeFromBlank(seg.id):fillBlank(seg.id);
+   tb.appendChild(span);
+  }
+ });
+ document.getElementById("btnCheck").disabled=Object.keys(filled).length!==SEGMENTS.filter(s=>s.type==="blank").length;
+}
+
+function selectWord(w){
+ if(Object.values(filled).includes(w))return;
+ selectedWord=selectedWord===w?null:w;
+ checked=false;
+ document.getElementById("score").classList.remove("show");
+ render();
+}
+function fillBlank(id){
+ if(!selectedWord)return;
+ filled[id]=selectedWord;
+ selectedWord=null;
+ checked=false;
+ document.getElementById("score").classList.remove("show");
+ render();
+}
+function removeFromBlank(id){
+ delete filled[id];
+ selectedWord=null;
+ checked=false;
+ document.getElementById("score").classList.remove("show");
+ render();
+}
+function checkAnswers(){
+ checked=true;
+ const blanks=SEGMENTS.filter(s=>s.type==="blank");
+ const correct=blanks.filter(b=>filled[b.id]===b.answer).length;
+ const score=document.getElementById("score");
+ score.classList.add("show");
+ if(correct===blanks.length){
+  score.className="score show perfect";
+  score.textContent="🎉 Μπράβο! Όλες οι απαντήσεις είναι σωστές!";
+ }else{
+  score.className="score show partial";
+  score.textContent=`Σωστές απαντήσεις: ${correct} / ${blanks.length}`;
+ }
+ render();
+}
+function reset(){
+ filled={}; selectedWord=null; checked=false;
+ document.getElementById("score").classList.remove("show");
+ render();
+}
+render();
+</script>
+</body>
+</html>

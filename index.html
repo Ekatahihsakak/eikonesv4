@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μόραλης — Άσκηση Κενών</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #f5f0e8;
+    font-family: Georgia, serif;
+    padding: 1.5rem 1rem 3rem;
+    color: #2c1f0e;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+  .header .sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 0.4rem;
+  }
+  .header h1 {
+    font-size: 1.15rem;
+    font-weight: normal;
+    line-height: 1.5;
+  }
+  .header .line {
+    width: 50px;
+    height: 2px;
+    background: #8b7355;
+    margin: 0.9rem auto 0;
+  }
+
+  /* Word bank */
+  .bank-box {
+    background: #ede6d6;
+    border: 1px solid #c9b89a;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .bank-label {
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 0.6rem;
+  }
+  .bank-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .word-chip {
+    padding: 0.35rem 0.8rem;
+    border-radius: 20px;
+    background: #fff;
+    border: 1.5px solid #8b7355;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .word-chip.used {
+    background: #d5cfc4;
+    border-color: #c5bfb4;
+    color: #aaa;
+    pointer-events: none;
+  }
+  .word-chip.selected {
+    background: #2c1f0e;
+    color: #f5f0e8;
+    border-color: #2c1f0e;
+  }
+
+  /* Text area */
+  .text-box {
+    background: #fff;
+    border: 1px solid #d6cabb;
+    border-radius: 12px;
+    padding: 1.4rem 1.2rem;
+    font-size: 1rem;
+    line-height: 2.2;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 2px 12px rgba(44,31,14,0.06);
+  }
+
+  .blank {
+    display: inline-block;
+    min-width: 110px;
+    padding: 0 0.4rem;
+    border-bottom: 2px solid #8b7355;
+    border-radius: 3px 3px 0 0;
+    text-align: center;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    vertical-align: bottom;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .blank.empty {
+    color: #bbb;
+    font-style: italic;
+  }
+  .blank.filled {
+    background: #faf6f0;
+    color: #2c1f0e;
+  }
+  .blank.correct {
+    background: #eaf4ea;
+    border-color: #5a8a5a;
+    color: #3a6b3a;
+  }
+  .blank.wrong {
+    background: #fdf0ef;
+    border-color: #c0392b;
+    color: #c0392b;
+  }
+  .blank.active-target {
+    border-color: #2c1f0e;
+    background: #f0ebe0;
+  }
+
+  /* Buttons */
+  .buttons {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .btn-check {
+    padding: 0.65rem 1.6rem;
+    background: #2c1f0e;
+    color: #f5f0e8;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .btn-check:disabled {
+    background: #c5bfb4;
+    color: #aaa;
+    cursor: default;
+  }
+  .btn-reset {
+    padding: 0.65rem 1.4rem;
+    background: transparent;
+    color: #8b7355;
+    border: 1.5px solid #8b7355;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  /* Score */
+  .score {
+    text-align: center;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .score.show { display: block; }
+  .score.perfect { background: #eaf4ea; border: 1.5px solid #5a8a5a; color: #3a6b3a; }
+  .score.partial { background: #fdf6ee; border: 1.5px solid #c9a96e; color: #7a5c2e; }
+
+  .hint {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #b0a48a;
+    letter-spacing: 0.04em;
+    margin-top: 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="sub">Άσκηση Κατανόησης</div>
+  <h1>Γιάννης Μόραλης<br>«Επιτύμβια Σύνθεση»</h1>
+  <div class="line"></div>
+</div>
+
+<div class="bank-box">
+  <div class="bank-label">Λέξεις</div>
+  <div class="bank-words" id="bank"></div>
+</div>
+
+<div class="text-box" id="textbox"></div>
+
+<div class="score" id="score"></div>
+
+<div class="buttons">
+  <button class="btn-check" id="btnCheck" disabled onclick="checkAnswers()">Έλεγχος</button>
+  <button class="btn-reset" onclick="reset()">Επαναφορά</button>
+</div>
+
+<div class="hint">Πάτα μια λέξη, μετά πάτα το κενό • Πάτα συμπληρωμένο κενό για αφαίρεση</div>
+
+<script>
+const WORDS = ["μορφές","χώρο","πλούτο","μεγαλοπρέπειας","χρωμάτων","διάσταση","πραγματεύτηκε"];
+
+const SEGMENTS = [
+  {type:"text", content:"Ο καλλιτέχνης, που σφράγισε με το έργο του την τέχνη μετά τον πόλεμο στην Ελλάδα, δημιούργησε έργα με μεγάλο εικαστικό "},
+  {type:"blank", id:0, answer:"πλούτο"},
+  {type:"text", content:". Ο συγκεκριμένος πίνακας ανήκει σε μια σειρά έργων στα οποία "},
+  {type:"blank", id:1, answer:"πραγματεύτηκε"},
+  {type:"text", content:" το θέμα του επιτυμβίου. Οι γυναικείες "},
+  {type:"blank", id:2, answer:"μορφές"},
+  {type:"text", content:", που συνδέονται συνθετικά και νοηματικά μεταξύ τους, τα πλαστικά στοιχεία που γεμίζουν και οργανώνουν το "},
+  {type:"blank", id:3, answer:"χώρο"},
+  {type:"text", content:", η αρμονία των γήινων "},
+  {type:"blank", id:4, answer:"χρωμάτων"},
+  {type:"text", content:" κάνουν το θέμα του θανάτου να χάσει τη θλιβερή του "},
+  {type:"blank", id:5, answer:"διάσταση"},
+  {type:"text", content:" και το έργο να δημιουργεί στο θεατή μια αίσθηση "},
+  {type:"blank", id:6, answer:"μεγαλοπρέπειας"},
+  {type:"text", content:", η οποία μοιάζει να αφορά την ίδια την τέχνη της ζωγραφικής."},
+];
+
+let filled = {}; // blankId -> word
+let selectedWord = null;
+let checked = false;
+
+function render() {
+  // Bank
+  const bank = document.getElementById('bank');
+  const usedWords = Object.values(filled);
+  bank.innerHTML = '';
+  WORDS.forEach(w => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip' + (usedWords.includes(w) ? ' used' : '') + (selectedWord === w ? ' selected' : '');
+    chip.textContent = w;
+    chip.onclick = () => selectWord(w);
+    bank.appendChild(chip);
+  });
+
+  // Text
+  const tb = document.getElementById('textbox');
+  tb.innerHTML = '';
+  SEGMENTS.forEach(seg => {
+    if (seg.type === 'text') {
+      tb.appendChild(document.createTextNode(seg.content));
+    } else {
+      const val = filled[seg.id];
+      const span = document.createElement('span');
+      let cls = 'blank';
+      if (checked && val) {
+        cls += val === seg.answer ? ' correct' : ' wrong';
+      } else if (val) {
+        cls += ' filled';
+      } else {
+        cls += ' empty';
+        if (selectedWord) cls += ' active-target';
+      }
+      span.className = cls;
+      if (val) {
+        span.textContent = val + (checked ? (val === seg.answer ? ' ✓' : ' ✗') : '');
+        span.onclick = () => removeFromBlank(seg.id);
+      } else {
+        span.textContent = '_ _ _ _ _';
+        span.onclick = () => fillBlank(seg.id);
+      }
+      tb.appendChild(span);
+    }
+  });
+
+  // Check button
+  const allFilled = Object.keys(filled).length === SEGMENTS.filter(s=>s.type==='blank').length;
+  document.getElementById('btnCheck').disabled = !allFilled;
+}
+
+function selectWord(w) {
+  if (Object.values(filled).includes(w)) return;
+  selectedWord = selectedWord === w ? null : w;
+  checked = false;
+  render();
+}
+
+function fillBlank(id) {
+  if (!selectedWord) return;
+  filled[id] = selectedWord;
+  selectedWord = null;
+  checked = false;
+  render();
+}
+
+function removeFromBlank(id) {
+  delete filled[id];
+  selectedWord = null;
+  checked = false;
+  document.getElementById('score').classList.remove('show');
+  render();
+}
+
+function checkAnswers() {
+  checked = true;
+  const blanks = SEGMENTS.filter(s => s.type === 'blank');
+  const correct = blanks.filter(b => filled[b.id] === b.answer).length;
+  const scoreEl = document.getElementById('score');
+  scoreEl.classList.add('show');
+  if (correct === blanks.length) {
+    scoreEl.className = 'score show perfect';
+    scoreEl.textContent = '🎉 Μπράβο! Όλες οι απαντήσεις είναι σωστές!';
+  } else {
+    scoreEl.className = 'score show partial';
+    scoreEl.textContent = `Σωστές απαντήσεις: ${correct} / ${blanks.length}`;
+  }
+  render();
+}
+
+function reset() {
+  filled = {};
+  selectedWord = null;
+  checked = false;
+  document.getElementById('score').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
