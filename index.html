@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ασκήσεις Ιστορίας Τέχνης</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: #f5f0e8;
+    font-family: Georgia, serif;
+    color: #2c1f0e;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .header .sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 0.5rem;
+  }
+  .header h1 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    line-height: 1.5;
+  }
+  .header .line {
+    width: 50px;
+    height: 2px;
+    background: #8b7355;
+    margin: 0.9rem auto 0;
+  }
+
+  /* Score summary */
+  .summary {
+    background: #ede6d6;
+    border: 1px solid #c9b89a;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .summary .label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 0.4rem;
+  }
+  .summary .total {
+    font-size: 1.6rem;
+    color: #2c1f0e;
+  }
+  .summary .total span {
+    font-size: 0.9rem;
+    color: #8b7355;
+  }
+  .progress-bar {
+    height: 6px;
+    background: #d6cabb;
+    border-radius: 3px;
+    margin-top: 0.6rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #5a8a5a;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  /* Exercise cards */
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #d6cabb;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 8px rgba(44,31,14,0.05);
+    transition: transform 0.15s, box-shadow 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(44,31,14,0.08);
+  }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #ede6d6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .card-icon.done {
+    background: #eaf4ea;
+  }
+  .card-icon.perfect {
+    background: #eaf4ea;
+  }
+
+  .card-info {
+    flex: 1;
+  }
+  .card-title {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .card-sub {
+    font-size: 0.75rem;
+    color: #8b7355;
+  }
+
+  .card-score {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .score-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+  .score-badge.none {
+    background: #ede6d6;
+    color: #8b7355;
+  }
+  .score-badge.partial {
+    background: #fdf6ee;
+    color: #7a5c2e;
+    border: 1px solid #c9a96e;
+  }
+  .score-badge.perfect {
+    background: #eaf4ea;
+    color: #3a6b3a;
+    border: 1px solid #5a8a5a;
+  }
+
+  .reset-all {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+  .btn-reset-all {
+    background: transparent;
+    color: #b0a48a;
+    border: 1px solid #b0a48a;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    font-family: Georgia, serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  /* XP / Level */
+  .xp-box {
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+    background: #2c1f0e;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    color: #f5f0e8;
+  }
+  .xp-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .xp-level {
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .xp-level span {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #f5c842;
+  }
+  .xp-total {
+    font-size: 0.75rem;
+    color: #b0a48a;
+  }
+  .xp-bar-bg {
+    height: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.3rem;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f5c842, #f5a623);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .xp-progress-text {
+    font-size: 0.68rem;
+    color: #b0a48a;
+    text-align: right;
+  }
+
+
+  /* Goals */
+  .goals-box {
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+    background: #fff;
+    border: 1px solid #d6cabb;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 8px rgba(44,31,14,.05);
+  }
+  .goals-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 0.8rem;
+  }
+  .goal-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0ebe0;
+  }
+  .goal-item:last-child { border-bottom: none; }
+  .goal-icon { font-size: 1.4rem; width: 32px; text-align: center; }
+  .goal-info { flex: 1; }
+  .goal-name { font-size: 0.9rem; color: #2c1f0e; }
+  .goal-xp { font-size: 0.72rem; color: #8b7355; }
+  .goal-status {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+  }
+  .goal-status.locked {
+    background: #ede6d6;
+    color: #8b7355;
+  }
+  .goal-status.unlocked {
+    background: #eaf4ea;
+    color: #3a6b3a;
+    border: 1px solid #5a8a5a;
+  }
+  .goal-item.unlocked .goal-name { color: #3a6b3a; }
+
+  /* Unlock toast */
+  .unlock-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: #2c1f0e;
+    color: #f5f0e8;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    text-align: center;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .unlock-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .unlock-toast .ut-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .unlock-toast .ut-title { font-size: 1.1rem; margin-bottom: 0.3rem; }
+  .unlock-toast .ut-sub { font-size: 0.8rem; color: #b0a48a; }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="sub">Ιστορία Τέχνης</div>
+  <h1>Ασκήσεις<br>Συμπλήρωσης Κενών</h1>
+  <div class="line"></div>
+</div>
+
+<!-- Score summary -->
+<div class="summary" style="max-width:500px; margin: 0 auto 1.5rem;">
+  <div class="label">Συνολική Πρόοδος</div>
+  <div class="total" id="totalScore">0 <span>/ 0 σωστές</span></div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Cards -->
+
+<div class="xp-box" id="xpBox">
+  <div class="xp-top">
+    <div class="xp-level">⚡ Level <span id="xpLevel">1</span></div>
+    <div class="xp-total" id="xpTotal">0 XP</div>
+  </div>
+  <div class="xp-bar-bg">
+    <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+  </div>
+  <div class="xp-progress-text" id="xpProgressText">0 / 200 XP για επόμενο level</div>
+</div>
+
+
+<div class="goals-box">
+  <div class="goals-title">🎯 Στόχοι</div>
+  <div id="goalsList"></div>
+</div>
+<div class="unlock-toast" id="unlockToast">
+  <div class="ut-icon" id="utIcon"></div>
+  <div class="ut-title" id="utTitle"></div>
+  <div class="ut-sub">Νέο ξεκλείδωμα!</div>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="reset-all">
+  <button class="btn-reset-all" onclick="resetAll()">Διαγραφή όλων των σκορ</button>
+</div>
+
+<script>
+const EXERCISES = [
+  { file: "moralis.html",            title: "Γιάννης Μόραλης",    sub: "Επιτύμβια Σύνθεση",     icon: "🎨", total: 7 },
+  { file: "klimt.html",              title: "Γκούσταβ Κλιμτ",     sub: "Το φιλί",                icon: "🖼️", total: 12 },
+  { file: "peiramatikosxoleio.html", title: "Δημήτρης Πικιώνης",  sub: "Πειραματικό Σχολείο",    icon: "🏛️", total: 18 },
+  { file: "potiriapsenti.html",      title: "Πάμπλο Πικάσο",      sub: "Ποτήρι με αψέντι",       icon: "🎭", total: 18 },
+  { file: "xoros1.html",             title: "Ανρί Ματίς",         sub: "Ο Χορός",                icon: "💃", total: 19 },
+];
+
+function getScores() {
+  try { return JSON.parse(localStorage.getItem('askiseis_scores') || '{}'); } catch { return {}; }
+}
+
+function saveScores(s) {
+  localStorage.setItem('askiseis_scores', JSON.stringify(s));
+}
+
+function resetAll() {
+  if (confirm('Να διαγραφούν όλα τα σκορ;')) {
+    localStorage.removeItem('askiseis_scores');
+    render();
+  }
+}
+
+function render() {
+  const scores = getScores();
+  const container = document.getElementById('cards');
+  container.innerHTML = '';
+
+  let totalCorrect = 0, totalPossible = 0;
+
+  EXERCISES.forEach(ex => {
+    const s = scores[ex.file];
+    const hasScore = s !== undefined;
+    const isPerfect = hasScore && s === ex.total;
+
+    totalPossible += ex.total;
+    if (hasScore) totalCorrect += s;
+
+    // Icon
+    let iconClass = 'card-icon';
+    let iconContent = ex.icon;
+    if (isPerfect) { iconClass += ' perfect'; iconContent = '⭐'; }
+    else if (hasScore) { iconClass += ' done'; }
+
+    // Badge
+    let badgeClass = 'score-badge none';
+    let badgeText = 'Αδοκίμαστη';
+    if (hasScore) {
+      if (isPerfect) { badgeClass = 'score-badge perfect'; badgeText = `${s}/${ex.total} ✓`; }
+      else { badgeClass = 'score-badge partial'; badgeText = `${s}/${ex.total}`; }
+    }
+
+    const card = document.createElement('a');
+    card.href = ex.file;
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="${iconClass}">${iconContent}</div>
+      <div class="card-info">
+        <div class="card-title">${ex.title}</div>
+        <div class="card-sub">${ex.sub}</div>
+      </div>
+      <div class="card-score">
+        <span class="${badgeClass}">${badgeText}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Update summary
+  const doneExercises = Object.keys(scores).length;
+  document.getElementById('totalScore').innerHTML =
+    `${totalCorrect} <span>/ ${totalPossible} σωστές</span>`;
+  const pct = totalPossible > 0 ? (totalCorrect / totalPossible) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// Listen for score updates from exercise pages
+window.addEventListener('storage', render);
+
+
+// XP System
+const XP_KEY = 'askiseis_xp';
+function getXP(){try{return parseInt(localStorage.getItem(XP_KEY)||'0');}catch{return 0;}}
+function getLevel(xp){
+  if(xp<2000) return Math.floor(xp/200)+1;
+  return 10+Math.floor((xp-2000)/500)+1;
+}
+function getXPForLevel(level){
+  if(level<=10) return level*200;
+  return 2000+(level-10)*500;
+}
+function renderXP(){
+  const xp = getXP();
+  const lv = getLevel(xp);
+  const curr = getXPForLevel(lv-1);
+  const next = getXPForLevel(lv);
+  const progress = xp - curr;
+  const needed = next - curr;
+  const pct = Math.round((progress/needed)*100);
+  document.getElementById('xpLevel').textContent = lv;
+  document.getElementById('xpTotal').textContent = xp.toLocaleString() + ' XP';
+  document.getElementById('xpBarFill').style.width = pct + '%';
+  document.getElementById('xpProgressText').textContent = progress.toLocaleString() + ' / ' + needed.toLocaleString() + ' XP για επόμενο level';
+}
+
+const GOALS = [
+  { level: 10,  icon: '🧃', name: 'Χυμός',        xp: 2000  },
+  { level: 20,  icon: '🍫', name: 'Σοκολάτα',     xp: 7000  },
+  { level: 30,  icon: '🥞', name: 'Κρέπα',         xp: 12000 },
+  { level: 100, icon: '🎮', name: 'PlayStation 5', xp: 47000 },
+];
+const UNLOCKED_KEY = 'askiseis_unlocked';
+
+function getUnlocked() {
+  try { return JSON.parse(localStorage.getItem(UNLOCKED_KEY) || '[]'); } catch { return []; }
+}
+function setUnlocked(arr) {
+  try { localStorage.setItem(UNLOCKED_KEY, JSON.stringify(arr)); } catch {}
+}
+
+function renderGoals() {
+  const xp = getXP();
+  const lv = getLevel(xp);
+  const unlocked = getUnlocked();
+  const list = document.getElementById('goalsList');
+  list.innerHTML = '';
+
+  // Check for new unlocks
+  const newUnlocks = [];
+  GOALS.forEach(g => {
+    if (lv >= g.level && !unlocked.includes(g.level)) {
+      newUnlocks.push(g);
+      unlocked.push(g.level);
+    }
+  });
+  if (newUnlocks.length > 0) {
+    setUnlocked(unlocked);
+    showUnlockToast(newUnlocks[newUnlocks.length - 1]);
+  }
+
+  GOALS.forEach(g => {
+    const isUnlocked = lv >= g.level;
+    const div = document.createElement('div');
+    div.className = 'goal-item' + (isUnlocked ? ' unlocked' : '');
+    div.innerHTML = `
+      <div class="goal-icon">${isUnlocked ? g.icon : '🔒'}</div>
+      <div class="goal-info">
+        <div class="goal-name">${g.name}</div>
+        <div class="goal-xp">Level ${g.level} • ${g.xp.toLocaleString()} XP</div>
+      </div>
+      <div class="goal-status ${isUnlocked ? 'unlocked' : 'locked'}">${isUnlocked ? '✓ Κερδήθηκε!' : 'Κλειδωμένο'}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function showUnlockToast(goal) {
+  const toast = document.getElementById('unlockToast');
+  document.getElementById('utIcon').textContent = goal.icon;
+  document.getElementById('utTitle').textContent = 'Κέρδισες: ' + goal.name + '!';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+render();
+renderXP();
+renderGoals();
+window.addEventListener("storage", function(){render();renderXP();});
+
+</script>
+</body>
+</html>
