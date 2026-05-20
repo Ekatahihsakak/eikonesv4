@@ -223,6 +223,77 @@
     text-align: right;
   }
 
+
+  /* Goals */
+  .goals-box {
+    max-width: 500px;
+    margin: 0 auto 1.5rem;
+    background: #fff;
+    border: 1px solid #d6cabb;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 8px rgba(44,31,14,.05);
+  }
+  .goals-title {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 0.8rem;
+  }
+  .goal-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0ebe0;
+  }
+  .goal-item:last-child { border-bottom: none; }
+  .goal-icon { font-size: 1.4rem; width: 32px; text-align: center; }
+  .goal-info { flex: 1; }
+  .goal-name { font-size: 0.9rem; color: #2c1f0e; }
+  .goal-xp { font-size: 0.72rem; color: #8b7355; }
+  .goal-status {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+  }
+  .goal-status.locked {
+    background: #ede6d6;
+    color: #8b7355;
+  }
+  .goal-status.unlocked {
+    background: #eaf4ea;
+    color: #3a6b3a;
+    border: 1px solid #5a8a5a;
+  }
+  .goal-item.unlocked .goal-name { color: #3a6b3a; }
+
+  /* Unlock toast */
+  .unlock-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: #2c1f0e;
+    color: #f5f0e8;
+    padding: 1.5rem 2rem;
+    border-radius: 16px;
+    text-align: center;
+    z-index: 999;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .unlock-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .unlock-toast .ut-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .unlock-toast .ut-title { font-size: 1.1rem; margin-bottom: 0.3rem; }
+  .unlock-toast .ut-sub { font-size: 0.8rem; color: #b0a48a; }
+
 </style>
 </head>
 <body>
@@ -253,6 +324,17 @@
     <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
   </div>
   <div class="xp-progress-text" id="xpProgressText">0 / 200 XP για επόμενο level</div>
+</div>
+
+
+<div class="goals-box">
+  <div class="goals-title">🎯 Στόχοι</div>
+  <div id="goalsList"></div>
+</div>
+<div class="unlock-toast" id="unlockToast">
+  <div class="ut-icon" id="utIcon"></div>
+  <div class="ut-title" id="utTitle"></div>
+  <div class="ut-sub">Νέο ξεκλείδωμα!</div>
 </div>
 
 <div class="cards" id="cards"></div>
@@ -367,9 +449,69 @@ function renderXP(){
   document.getElementById('xpProgressText').textContent = progress.toLocaleString() + ' / ' + needed.toLocaleString() + ' XP για επόμενο level';
 }
 
+const GOALS = [
+  { level: 10,  icon: '🧃', name: 'Χυμός',        xp: 2000  },
+  { level: 20,  icon: '🍫', name: 'Σοκολάτα',     xp: 7000  },
+  { level: 30,  icon: '🥞', name: 'Κρέπα',         xp: 12000 },
+  { level: 100, icon: '🎮', name: 'PlayStation 5', xp: 47000 },
+];
+const UNLOCKED_KEY = 'askiseis_unlocked';
+
+function getUnlocked() {
+  try { return JSON.parse(localStorage.getItem(UNLOCKED_KEY) || '[]'); } catch { return []; }
+}
+function setUnlocked(arr) {
+  try { localStorage.setItem(UNLOCKED_KEY, JSON.stringify(arr)); } catch {}
+}
+
+function renderGoals() {
+  const xp = getXP();
+  const lv = getLevel(xp);
+  const unlocked = getUnlocked();
+  const list = document.getElementById('goalsList');
+  list.innerHTML = '';
+
+  // Check for new unlocks
+  const newUnlocks = [];
+  GOALS.forEach(g => {
+    if (lv >= g.level && !unlocked.includes(g.level)) {
+      newUnlocks.push(g);
+      unlocked.push(g.level);
+    }
+  });
+  if (newUnlocks.length > 0) {
+    setUnlocked(unlocked);
+    showUnlockToast(newUnlocks[newUnlocks.length - 1]);
+  }
+
+  GOALS.forEach(g => {
+    const isUnlocked = lv >= g.level;
+    const div = document.createElement('div');
+    div.className = 'goal-item' + (isUnlocked ? ' unlocked' : '');
+    div.innerHTML = `
+      <div class="goal-icon">${isUnlocked ? g.icon : '🔒'}</div>
+      <div class="goal-info">
+        <div class="goal-name">${g.name}</div>
+        <div class="goal-xp">Level ${g.level} • ${g.xp.toLocaleString()} XP</div>
+      </div>
+      <div class="goal-status ${isUnlocked ? 'unlocked' : 'locked'}">${isUnlocked ? '✓ Κερδήθηκε!' : 'Κλειδωμένο'}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function showUnlockToast(goal) {
+  const toast = document.getElementById('unlockToast');
+  document.getElementById('utIcon').textContent = goal.icon;
+  document.getElementById('utTitle').textContent = 'Κέρδισες: ' + goal.name + '!';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
 render();
 renderXP();
+renderGoals();
 window.addEventListener("storage", function(){render();renderXP();});
+
 </script>
 </body>
 </html>
